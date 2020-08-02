@@ -5,6 +5,7 @@ import sys
 import re
 import pwd
 import datetime
+import logging
 from configparser import ConfigParser
 
 CONFIG_LOCATIONS = [
@@ -47,7 +48,11 @@ def get_title(filename):
     with open(filename, 'r') as fobj:
         data = fobj.read()
     res = re.search(r'<title>(.*?)</title>', data)
-    return res.group(1)
+    try:
+        return res.group(1)
+    except IndexError:
+        logging.debug(f'No HTML title found in {filename}')
+        pass
 
 
 def get_users(config):
@@ -61,24 +66,28 @@ def get_users(config):
     # Generate array of user information
     users = []
     for user in sorted(pwd.getpwall(), key=lambda x: x.pw_name):
+        logging.debug(f'Processing {user.pw_name}')
+
         # Skip users not in the primary group ID
         if user.pw_gid != group_id:
             continue
 
         # if the user doesn't have a public_html folder, skip
         if not os.path.exists(os.path.join(user.pw_dir, public_html_path)):
+            logging.debug(f'Skipping {user.pw_name} as public_html is missing')
             continue
 
         # if .hidden exists in the public_html, skip it
         if os.path.exists(os.path.join(user.pw_dir, public_html_path, hidden_file)):
+            logging.debug(f'Skipping {user.pw_name} as the user is marked as hidden')
             continue
 
-        index_file_path = os.path.join(
-            user.pw_dir, public_html_path, index_file)
+        index_file_path = os.path.join(user.pw_dir, public_html_path, index_file)
         if os.path.exists(index_file_path):
             title = get_title(index_file_path)
             mtime = os.path.getmtime(index_file_path)
         else:
+            logging.debug(f'Index is missing for {user.pw_name}')
             title = None
             mtime = 0
 
@@ -112,8 +121,7 @@ def generate_text(config, data):
 
 def main():
     # TODO: Argparse
-    # TODO: proper logging (logging module)
-
+    logging.basicConfig(level=logging.WARNING)
     cfg = get_config()
 
     # Generate data Dict
@@ -128,10 +136,11 @@ def main():
     for output_data in cfg.items('output'):
         format, output_file = output_data
         if f'generate_{format}' in globals():
+            logging.info(f'Rendering {format} to {output_file}')
             try:
                 rendered_output = globals()[f'generate_{format}'](cfg, data)
             except Exception:
-                print(f'Something went wrong rendering {format}')
+                logging.exception(f'Something went wrong rendering {format}')
                 continue
             with open(output_file, 'w') as fobj:
                 fobj.write(rendered_output)
