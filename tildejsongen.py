@@ -36,9 +36,8 @@ def get_config(filename=None):
 
 def read_config(filename):
     """Read a config file and produce a ConfigParser object"""
-    print(filename)
     cfg = ConfigParser()
-    cfg.read_dict(CONFIG_LOCATIONS)
+    cfg.read_dict(CONFIG_DEFAULTS)
     cfg.read(filename)
     return cfg
 
