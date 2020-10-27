@@ -48,8 +48,10 @@ def get_title(filename):
         data = fobj.read()
     res = re.search(r'<title>(.*?)</title>', data)
     try:
-        return res.group(1)
-    except IndexError:
+        if res:
+            return res.group(1)
+        return '~somebody'
+    except (IndexError, AttributeError):
         logging.debug(f'No HTML title found in {filename}')
         pass
 
