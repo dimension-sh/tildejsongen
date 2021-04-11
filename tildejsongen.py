@@ -25,6 +25,10 @@ CONFIG_DEFAULTS = {
 }
 
 
+def str2bool(v):
+    return v.lower() in ("yes", "true", "t", "1")
+
+
 def get_config(filename=None):
     """Identify the config file to use and load it"""
     if filename:
@@ -127,6 +131,11 @@ def main():
 
     # Generate data Dict
     data = dict(cfg.items(section='info'))
+
+    # Ensure 'want_users' is a bool, if it set
+    if 'want_users' in data:
+        data['want_users'] = str2bool(data['want_users'])
+
     users = get_users(cfg)
     data.update({
         'users': users,
