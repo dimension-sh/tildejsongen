@@ -59,7 +59,7 @@ def get_title(filename: str) -> str:
     return '~somebody'
 
 
-def get_users(config: ConfigParser) -> list[dict]:
+def get_users(config: ConfigParser) -> list:
     """Return a dict of the current visible users and their tilde.json data."""
     # Get the values of the file locations
     public_html_path = config.get('paths', 'public_html')
