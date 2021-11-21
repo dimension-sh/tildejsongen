@@ -54,7 +54,7 @@ def get_title(filename: str) -> str:
     with open(filename, 'r') as fobj:
         raw_html = fobj.read()
     res = re.search('<title>(.*?)</title>', raw_html)
-    if len(res.groups()) > 1:
+    if res and len(res.groups()) >= 1:
         return res.group(1)
     return '~somebody'
 
