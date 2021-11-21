@@ -29,7 +29,7 @@ CONFIG_DEFAULTS = types.MappingProxyType({
 
 
 def str2bool(string_value: str) -> bool:
-    return string_value.lower() in set('yes', 'true', 't', '1')
+    return string_value.lower() in set(('yes', 'true', 't', '1'))
 
 
 def get_config(filename: str = None) -> ConfigParser:
