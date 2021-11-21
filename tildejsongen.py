@@ -6,14 +6,17 @@ import logging
 import os
 import pwd
 import re
+import types
 from configparser import ConfigParser
+
+__version__ = '0.2.0-dev'  # noqa: WPS410
 
 CONFIG_LOCATIONS = (
     '/etc/tildejsongen.ini',
     '/usr/local/etc/tildejsongen.ini',
 )
 
-CONFIG_DEFAULTS = {
+CONFIG_DEFAULTS = types.MappingProxyType({
     'paths': {
         'public_html': 'public_html',
         'hidden_file': '.hidden',
@@ -22,14 +25,14 @@ CONFIG_DEFAULTS = {
     'users': {
         'group_id': 100,
     },
-}
+})
 
 
-def str2bool(value):
-    return value.lower() in set('yes', 'true', 't', '1')
+def str2bool(string_value: str) -> bool:
+    return string_value.lower() in set('yes', 'true', 't', '1')
 
 
-def get_config(filename=None):
+def get_config(filename: str = None) -> ConfigParser:
     """Identify the config file to use and load it."""
     if filename:
         return read_config(filename)
@@ -38,7 +41,7 @@ def get_config(filename=None):
             return read_config(config_path)
 
 
-def read_config(filename):
+def read_config(filename: str) -> ConfigParser:
     """Read a config file and produce a ConfigParser object."""
     cfg = ConfigParser()
     cfg.read_dict(CONFIG_DEFAULTS)
@@ -46,22 +49,18 @@ def read_config(filename):
     return cfg
 
 
-def get_title(filename):
+def get_title(filename: str) -> str:
     """Locate the first title in a HTML document."""
     with open(filename, 'r') as fobj:
         raw_html = fobj.read()
     res = re.search('<title>(.*?)</title>', raw_html)
-    try:
-        if res:
-            return res.group(1)
-        return '~somebody'
-    except (IndexError, AttributeError):
-        logging.debug('No HTML title found in {0}'.format(filename))
-        pass
+    if len(res.groups()) > 1:
+        return res.group(1)
+    return '~somebody'
 
 
-def get_users(config):
-    """Returns a dict of the current visible users and their tilde.json data."""
+def get_users(config: ConfigParser) -> list[dict]:
+    """Return a dict of the current visible users and their tilde.json data."""
     # Get the values of the file locations
     public_html_path = config.get('paths', 'public_html')
     hidden_file = config.get('paths', 'hidden_file')
@@ -87,6 +86,7 @@ def get_users(config):
             logging.debug('Skipping {0} as the user is marked as hidden'.format(user.pw_name))
             continue
 
+        # Get title and mtime from the user's index file.
         index_file_path = os.path.join(user.pw_dir, public_html_path, index_file)
         if os.path.exists(index_file_path):
             title = get_title(index_file_path)
@@ -96,6 +96,7 @@ def get_users(config):
             title = None
             mtime = 0
 
+        # Add the user to the user list
         users.append({
             'username': user.pw_name,
             'title': title,
@@ -104,26 +105,26 @@ def get_users(config):
     return users
 
 
-def generate_json(config, user_data):
-    """Generate out a JSON format document"""
+def generate_json(config: dict, user_data: dict) -> str:
+    """Generate out a JSON format document."""
     return json.dumps(user_data)
 
 
-def generate_yaml(config, user_data):
-    """Generate out a YAML format document"""
+def generate_yaml(config: dict, user_data: dict) -> str:
+    """Generate out a YAML format document."""
     import yaml  # noqa: WPS433
     return yaml.dump(user_data)
 
 
-def generate_text(config, user_data):
-    """Generate out a Text format document"""
+def generate_text(config: dict, user_data: dict) -> str:
+    """Generate out a Text format document."""
     import jinja2  # noqa: WPS433
     template = config.get('jinja2', 'template')
     with open(template, 'r') as fobj:
         return jinja2.Template(fobj.read()).render(data=user_data)
 
 
-def main():
+def main():  # noqa: WPS421
     # TODO: Argparse
     logging.basicConfig(level=logging.WARNING)
     cfg = get_config()
@@ -132,8 +133,9 @@ def main():
     info_data = dict(cfg.items(section='info'))
 
     # Ensure 'want_users' is a bool, if it set
-    if 'want_users' in info_data:
-        info_data['want_users'] = str2bool(info_data['want_users'])
+    want_users = info_data.get('want_users')
+    if want_users:
+        info_data['want_users'] = str2bool(want_users)
 
     users = get_users(cfg)
     info_data.update({
@@ -144,10 +146,11 @@ def main():
 
     for output_data in cfg.items('output'):
         format_name, output_file = output_data
-        if 'generate_{0}'.format(format_name) in globals():
+        format_func = globals().get('generate_{0}'.format(format_name))  # noqa: WPS421
+        if format_func:
             logging.info('Rendering {0} to {1}'.format(format_name, output_file))
             try:
-                rendered_output = globals()['generate_{0}'.format(format_name)](cfg, info_data)
+                rendered_output = format_func(cfg, info_data)
             except Exception:
                 logging.exception('Something went wrong rendering {0}'.format(format_name))
                 continue
