@@ -1,0 +1,22 @@
+on:
+  push:
+    tags:
+      - "*.*.*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - uses: actions/setup-python@v2
+
+      - name: Build Assets
+        run:  python setup.py sdist bdist_wheel
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/*
