@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""
+tildejsongen.
+
+A simple tool to generate a `tilde.json` file from a standard Linux shell
+system.
+"""
 
 import datetime
 import json
@@ -29,7 +35,8 @@ CONFIG_DEFAULTS = types.MappingProxyType({
 
 
 def str2bool(string_value: str) -> bool:
-    return string_value.lower() in set(('yes', 'true', 't', '1'))
+    """Convert common string truthy values to a boolean."""
+    return string_value.lower() in {'yes', 'true', 't', '1', 'on'}
 
 
 def get_config(filename: str = None) -> ConfigParser:
@@ -51,10 +58,10 @@ def read_config(filename: str) -> ConfigParser:
 
 def get_title(filename: str) -> str:
     """Locate the first title in a HTML document."""
-    with open(filename, 'r') as fobj:
-        raw_html = fobj.read()
+    with open(filename, 'r') as index:
+        raw_html = index.read()
     res = re.search('<title>(.*?)</title>', raw_html)
-    if res and len(res.groups()) >= 1:
+    if res and len(res.groups()):
         return res.group(1)
     return '~somebody'
 
@@ -120,11 +127,12 @@ def generate_text(config: dict, user_data: dict) -> str:
     """Generate out a Text format document."""
     import jinja2  # noqa: WPS433
     template = config.get('jinja2', 'template')
-    with open(template, 'r') as fobj:
-        return jinja2.Template(fobj.read()).render(data=user_data)
+    with open(template, 'r') as template_file:
+        return jinja2.Template(template_file.read()).render(data=user_data)
 
 
 def main():  # noqa: WPS421
+    """Run tildejsongen."""
     # TODO: Argparse
     logging.basicConfig(level=logging.WARNING)
     cfg = get_config()
@@ -154,8 +162,8 @@ def main():  # noqa: WPS421
             except Exception:
                 logging.exception('Something went wrong rendering {0}'.format(format_name))
                 continue
-            with open(output_file, 'w') as fobj:
-                fobj.write(rendered_output)
+            with open(output_file, 'w') as output:
+                output.write(rendered_output)
 
 
 if __name__ == '__main__':
