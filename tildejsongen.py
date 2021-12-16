@@ -15,7 +15,7 @@ import re
 import types
 from configparser import ConfigParser
 
-__version__ = '0.2.2'  # noqa: WPS410
+__version__ = '0.2.3'  # noqa: WPS410
 
 CONFIG_LOCATIONS = (
     '/etc/tildejsongen.ini',
