@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "tildejsongen"
+version = "0.2.3"
+description = "A simple Python script to generate a `tilde.json` file for Tilde-style servers"
+authors = ["Andrew Williams <andy@tensixtyone.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.scripts]
+tildejsongen = 'tildejsongen:main'
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pyyaml = "^6.0.1"
+jinja2 = "^3.0.0"
+
+[tool.poetry.group.test.dependencies]
+ruff = "^0.3.4"
+pytest = "^8.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+lint.ignore = ["E501"]
