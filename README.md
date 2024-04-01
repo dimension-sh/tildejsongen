@@ -1,6 +1,6 @@
 # tildejsongen
 
-<img src="https://img.shields.io/liberapay/receives/dimension.sh.svg?logo=liberapay">
+[![Liberapay logo](https://img.shields.io/liberapay/receives/dimension.sh.svg?logo=liberapay)](https://liberapay.com/dimension.sh/)
 
 A simple Python script to generate a [Tilde Description Protocol](http://protocol.club/~datagrok/beta-wiki/tdp.html) a.k.a. `tilde.json` file for Tilde-style servers.
 
