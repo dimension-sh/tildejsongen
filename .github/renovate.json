@@ -1,5 +1,6 @@
 {
     "extends": [
-        "config:base"
+        "config:base",
+        "github>dimension-sh/renovate-config:python"
     ]
 }
