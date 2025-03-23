@@ -1,6 +1,6 @@
 .PHONY: tests
 tests:
-	python3 -m pytest
+	python3 -m poetry run pytest 
 
 .PHONY: lint
 lint:
