@@ -24,7 +24,7 @@ jobs:
           virtualenvs-in-project: true
       - name: Install dependencies
         run: |
-          poetry install --no-interaction --no-root --with tests
+          poetry install --no-interaction --no-root --with test
       - name: Test with pytest
         run: |
           source $VENV
@@ -48,7 +48,7 @@ jobs:
           virtualenvs-in-project: true
       - name: Install dependencies
         run: |
-          poetry install --no-interaction --no-root --with tests
+          poetry install --no-interaction --no-root --with test
       - name: Lint with ruff
         run: |
           source $VENV
