@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tildejsongen"
-version = "0.3.0"
+version = "0.3.1"
 description = "A simple Python script to generate a `tilde.json` file for Tilde-style servers"
 authors = ["Andrew Williams <andy@tensixtyone.com>"]
 license = "MIT"
