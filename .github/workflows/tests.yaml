@@ -21,7 +21,6 @@ jobs:
         uses: astral-sh/setup-uv@v6
       - name: Test with pytest
         run: |
-          source $VENV
           make tests
 
   lint:
@@ -39,5 +38,4 @@ jobs:
         uses: astral-sh/setup-uv@v6
       - name: Lint with ruff
         run: |
-          source $VENV
           make lint
